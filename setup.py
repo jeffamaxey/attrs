@@ -103,11 +103,10 @@ def find_meta(meta):
     """
     Extract __*meta*__ from META_FILE.
     """
-    meta_match = re.search(
+    if meta_match := re.search(
         rf"^__{meta}__ = ['\"]([^'\"]*)['\"]", META_FILE, re.M
-    )
-    if meta_match:
-        return meta_match.group(1)
+    ):
+        return meta_match[1]
     raise RuntimeError(f"Unable to find __{meta}__ string.")
 
 
@@ -120,20 +119,23 @@ LOGO = """
 VERSION = find_meta("version")
 URL = find_meta("url")
 LONG = (
-    LOGO
-    + read("README.rst").split(".. teaser-begin")[1]
-    + "\n\n"
-    + "Release Information\n"
-    + "===================\n\n"
-    + re.search(
-        r"(\d+.\d.\d \(.*?\)\r?\n.*?)\r?\n\r?\n\r?\n----\r?\n\r?\n\r?\n",
-        read("CHANGELOG.rst"),
-        re.S,
-    ).group(1)
-    + "\n\n`Full changelog "
+    (
+        (
+            LOGO
+            + read("README.rst").split(".. teaser-begin")[1]
+            + "\n\n"
+            + "Release Information\n"
+            + "===================\n\n"
+            + re.search(
+                r"(\d+.\d.\d \(.*?\)\r?\n.*?)\r?\n\r?\n\r?\n----\r?\n\r?\n\r?\n",
+                read("CHANGELOG.rst"),
+                re.S,
+            )[1]
+        )
+        + "\n\n`Full changelog "
+    )
     + f"<{URL}en/stable/changelog.html>`_.\n\n"
-    + read("AUTHORS.rst")
-)
+) + read("AUTHORS.rst")
 
 
 if __name__ == "__main__":
